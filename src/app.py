@@ -9,6 +9,7 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User
+from sqlalchemy import select
 #from models import Person
 
 app = Flask(__name__)
@@ -44,6 +45,40 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+@app.route("/users", methods=["GET"])
+def get_users():
+    stmt = select(User) 
+    users = db.session.execute(stmt).scalars().all()
+    return jsonify([user.serialize() for user in users]), 200
+
+
+@app.route("/users", methods=["POST"])
+def create_user():
+   
+    if request.content_type != "application/json":
+        return jsonify({"error": "Unsupported Media Type"}), 415
+
+    data = request.get_json()
+
+ 
+
+    if not data or "email" not in data or "password" not in data:
+        return jsonify({"error": "Missing data"}), 400
+
+    new_user = User(
+        email=data["email"],
+        password=generate_password_hash(data["password"])
+    )
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify(new_user.serialize()), 201
+
+
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':

@@ -15,10 +15,9 @@ class User(db.Model):
     password: Mapped[str] = mapped_column(nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
 
-    # follow:Mapped[list["Follower"]]=relationship(back_populates="followers")
-    # followinn:Mapped[list["Follower"]]=relationship(back_populates="following")
+   
 
-    favoritos:Mapped[list["Favoritos"]]=relationship(back_populates="user")
+    favoritos:Mapped[list["Favoritos"]] = relationship(back_populates="user")
    
     def serialize(self):
 
@@ -26,7 +25,7 @@ class User(db.Model):
             "id": self.id,
             "email": self.email,
             # do not serialize the password, its a security breach
-            "favoritos":[favorito.serialize() for favorito in self.favoritos]
+            "favoritos":[favorito.id for favorito in self.favoritos] if self.favoritos else []
         }
     
 # class Follower(db.Model):
@@ -44,9 +43,20 @@ class Favoritos(db.Model):
     __tablename__='favoritos'
     id:Mapped[int]=mapped_column(primary_key=True)
     user_id:Mapped[int]=mapped_column(ForeignKey('users.id'))
-
-    # medias:Mapped[list["Medias"]]=relationship(back_populates="post")
+    people_id:Mapped[int]=mapped_column(ForeignKey('peoples.id'))
+    planeta_id:Mapped[int]=mapped_column(ForeignKey('planetas.id'))
+   
     user:Mapped["User"]=relationship(back_populates="favoritos")
+    people:Mapped["People"]=relationship(back_populates="favoritos")
+    planeta:Mapped["Planeta"]=relationship(back_populates="favoritos")
+
+    def serialize(self):
+        return {
+            "user_id": self.user_id,
+            "people_id":self.people_id,
+            "planeta_id":self.planeta_id
+            
+        }
     
 # class Medias(db.Model):
    
@@ -59,11 +69,37 @@ class Favoritos(db.Model):
 #    post_id:Mapped[int]=mapped_column(ForeignKey('posts.id'))
 
 
-# class Comments(db.Model):
+class People(db.Model):
    
-#    __tablename__='comments'
-#    id:Mapped[int]=mapped_column(primary_key=True)
-#    author_id:Mapped[int]=mapped_column(ForeignKey('users.id'))
-#    post_id:Mapped[int]=mapped_column(ForeignKey('posts.id'))
+   __tablename__='peoples'
+   id:Mapped[int]=mapped_column(primary_key=True)
+   name: Mapped[str] = mapped_column(String(100))
+   raza: Mapped[str] = mapped_column(String(100))
+
+   favoritos: Mapped[list["Favoritos"]] = relationship(back_populates="people")
 
 
+def serialize(self):
+        return {
+           "id": self.id,
+           "name": self.name,
+                 
+        }
+
+class Planeta(db.Model):
+   
+   __tablename__='planetas'
+   id:Mapped[int]=mapped_column(primary_key=True)
+   name: Mapped[str] = mapped_column(String(100))
+   size: Mapped[int]=mapped_column(nullable =False)
+
+   favoritos: Mapped[list["Favoritos"]] = relationship(back_populates="planeta")
+
+
+def serialize(self):
+        return {
+           "id": self.id,
+           "name": self.name,
+           "size":self.size
+                 
+        }
