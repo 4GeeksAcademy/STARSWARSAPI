@@ -10,6 +10,7 @@ from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User
 from sqlalchemy import select
+from werkzeug.security import generate_password_hash
 #from models import Person
 
 app = Flask(__name__)
@@ -56,20 +57,25 @@ def get_users():
 @app.route("/users", methods=["POST"])
 def create_user():
    
-    if request.content_type != "application/json":
-        return jsonify({"error": "Unsupported Media Type"}), 415
+    #if request.content_type != "application/json":
+     #if not request.is_json:
+        #return jsonify({"error": "Unsupported Media Type"}), 415
 
     data = request.get_json()
 
  
 
-    if not data or "email" not in data or "password" not in data:
-        return jsonify({"error": "Missing data"}), 400
+    #if not data or "email" not in data or "password" not in data:
+     #   return jsonify({"error": "Missing data"}), 400
 
     new_user = User(
         email=data["email"],
-        password=generate_password_hash(data["password"])
-    )
+        password=generate_password_hash(data["password"]),
+        username = data["username"],
+        lastname = data["lastname"],
+        is_active = True
+
+                )
 
     db.session.add(new_user)
     db.session.commit()

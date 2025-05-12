@@ -12,7 +12,7 @@ class User(db.Model):
     username:Mapped[str]=mapped_column(unique=True, nullable =False)
     lastname:Mapped[str]=mapped_column(unique=True, nullable =False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(nullable=False)
+    password: Mapped[str] = mapped_column(String,nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
 
    
@@ -27,16 +27,7 @@ class User(db.Model):
             # do not serialize the password, its a security breach
             "favoritos":[favorito.id for favorito in self.favoritos] if self.favoritos else []
         }
-    
-# class Follower(db.Model):
 
-    # __tablename__='followwesinout'
-    # id:Mapped[int] = mapped_column(primary_key=True)
-    # user_to_id:Mapped[int]=mapped_column(ForeignKey('users.id'))
-    # user_from_id:Mapped[int]=mapped_column(ForeignKey('users.id'))
-    
-    # followers:Mapped["User"]=relationship(back_populates="follow")
-    # following:Mapped["User"]=relationship(back_populates="followinn")
 
 class Favoritos(db.Model):
 
@@ -58,15 +49,7 @@ class Favoritos(db.Model):
             
         }
     
-# class Medias(db.Model):
-   
-#    __tablename__='medias'
-#    id:Mapped[int]=mapped_column(primary_key=True)
-#    url:Mapped[str]=mapped_column(unique=True, nullable =False)
-#    type:Mapped[int]=mapped_column(nullable=False)
 
-#    post:Mapped["Posts"]=relationship(back_populates="medias")
-#    post_id:Mapped[int]=mapped_column(ForeignKey('posts.id'))
 
 
 class People(db.Model):
