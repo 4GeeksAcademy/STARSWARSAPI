@@ -34,8 +34,8 @@ class Favoritos(db.Model):
     __tablename__='favoritos'
     id:Mapped[int]=mapped_column(primary_key=True)
     user_id:Mapped[int]=mapped_column(ForeignKey('users.id'))
-    people_id:Mapped[int]=mapped_column(ForeignKey('peoples.id'))
-    planeta_id:Mapped[int]=mapped_column(ForeignKey('planetas.id'))
+    people_id:Mapped[int]=mapped_column(ForeignKey('peoples.id'),nullable=True)
+    planeta_id:Mapped[int]=mapped_column(ForeignKey('planetas.id'),nullable=True)
    
     user:Mapped["User"]=relationship(back_populates="favoritos")
     people:Mapped["People"]=relationship(back_populates="favoritos")
@@ -43,11 +43,14 @@ class Favoritos(db.Model):
 
     def serialize(self):
         return {
+            
             "user_id": self.user_id,
             "people_id":self.people_id,
             "planeta_id":self.planeta_id
             
         }
+    
+
     
 
 
@@ -62,27 +65,28 @@ class People(db.Model):
    favoritos: Mapped[list["Favoritos"]] = relationship(back_populates="people")
 
 
-def serialize(self):
-        return {
-           "id": self.id,
-           "name": self.name,
+   def serialize(self):
+    return {
+        
+     "name": self.name,
+     "raza": self.raza
+        
                  
-        }
+    }
 
 class Planeta(db.Model):
    
    __tablename__='planetas'
    id:Mapped[int]=mapped_column(primary_key=True)
-   name: Mapped[str] = mapped_column(String(100))
-   size: Mapped[int]=mapped_column(nullable =False)
+   name:Mapped[str] = mapped_column(String(100))
+   size:Mapped[int]=mapped_column(nullable =False)
 
    favoritos: Mapped[list["Favoritos"]] = relationship(back_populates="planeta")
 
 
-def serialize(self):
-        return {
-           "id": self.id,
-           "name": self.name,
-           "size":self.size
+   def serialize(self):
+    return {
+        "name": self.name,
+        "size":self.size
                  
         }

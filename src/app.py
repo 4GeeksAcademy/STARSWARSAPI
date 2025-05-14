@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User,Planeta,People,Favoritos
 from sqlalchemy import select
 from werkzeug.security import generate_password_hash
 #from models import Person
@@ -82,9 +82,110 @@ def create_user():
 
     return jsonify(new_user.serialize()), 201
 
+@app.route("/users/<int:user_id>", methods=["GET"])
+def get_user(user_id):
+    stmt = select(User).where(User.id == user_id)
+    user = db.session.execute(stmt).scalar_one_or_none()
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+   
+    return jsonify(user.serialize()), 200
+
+@app.route("/planets", methods=["GET"])
+def get_planets():
+    stmt = select(Planeta) 
+    planets = db.session.execute(stmt).scalars().all()
+    
+    return jsonify([planet.serialize() for planet in planets]), 200
+
+@app.route("/planets/<int:planeta_id>", methods=["GET"])
+def get_planeta(planeta_id):
+    stmt = select(Planeta).where(Planeta.id == planeta_id)
+    planet = db.session.execute(stmt).scalar_one_or_none()
+    if planet is None:
+        return jsonify({"error": "User not found"}), 404
+   
+    return jsonify(planet.serialize()), 200
+
+@app.route("/Peoples", methods=["GET"])
+def get_peoples():
+    stmt = select(People) 
+    peoples = db.session.execute(stmt).scalars().all()
+    
+    return jsonify([people.serialize() for people in peoples]), 200
+
+@app.route("/Peoples/<int:people_id>", methods=["GET"])
+def get_people(people_id):
+    stmt = select(People).where(People.id == people_id)
+    people = db.session.execute(stmt).scalar_one_or_none()
+    if people is None:
+        return jsonify({"error": "User not found"}), 404
+   
+    return jsonify(people.serialize()), 200
 
 
 
+@app.route("/Favoritos", methods=["GET"])
+def get_enrollments():
+    favoritos = db.session.execute(select(Favoritos)).scalars().all()
+    return jsonify([e.serialize() for e in favoritos]), 200
+
+@app.route("/Favoritos", methods=["POST"])
+def create_enrollment():
+    data = request.get_json()
+    new_favorito = Favoritos(
+        user_id=data["user_id"],
+        people_id=data["people_id"],
+        planeta_id=data["planeta_id"]
+    )
+    db.session.add(new_favorito)
+    db.session.commit()
+    return jsonify(new_favorito.serialize()), 201
+
+@app.route("/Favoritos/planeta/<int:planeta_id>", methods=["POST"])
+def create_planeta_favorito(planeta_id):
+    data = request.get_json()
+    new_favorito = Favoritos(
+        user_id=data["user_id"],
+        #people_id=data["people_id"],
+        planeta_id=planeta_id
+    )
+    db.session.add(new_favorito)
+    db.session.commit()
+    return jsonify(new_favorito.serialize()), 201
+@app.route("/Favoritos/people/<int:people_id>", methods=["POST"])
+def create_people_favorito(people_id):
+    data = request.get_json()
+    new_favorito = Favoritos(
+        user_id=data["user_id"],
+        people_id=people_id,
+        #planeta_id=planeta_id
+    )
+    db.session.add(new_favorito)
+    db.session.commit()
+    return jsonify(new_favorito.serialize()), 201
+
+@app.route("/Favoritos/planeta/<int:planeta_id>", methods=["DELETE"])
+def delete_planeta(planeta_id):
+    stmt = select(Favoritos).where(Favoritos.planeta_id == planeta_id)
+    planeta = db.session.execute(stmt).scalar_one_or_none()
+    if planeta is None:
+        return jsonify({"error": "planeta not found"}), 404
+
+    db.session.delete(planeta)
+    db.session.commit()
+    return jsonify({"message": "planeta deleted"}), 200
+
+@app.route("/Favoritos/pepople/<int:people_id>", methods=["DELETE"])
+def delete_people(people_id):
+    stmt = select(Favoritos).where(Favoritos.people_id == people_id)
+    people = db.session.execute(stmt).scalar_one_or_none()
+    if people is None:
+        return jsonify({"error": "people not found"}), 404
+
+    db.session.delete(people)
+    db.session.commit()
+    return jsonify({"message": "people deleted"}), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
